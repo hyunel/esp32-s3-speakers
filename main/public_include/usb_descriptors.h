@@ -1,0 +1,121 @@
+#pragma once
+
+// Unit numbers are arbitrary selected
+#define UAC2_ENTITY_CLOCK               0x04
+// Speaker path
+#define UAC2_ENTITY_SPK_INPUT_TERMINAL  0x01
+#define UAC2_ENTITY_SPK_FEATURE_UNIT    0x02
+#define UAC2_ENTITY_SPK_OUTPUT_TERMINAL 0x03
+
+// #define ITF_NUM_AUDIO_STREAMING_SPK -1
+enum ITF_NUMs
+{
+  ITF_NUM_AUDIO_CONTROL = 0,
+  ITF_NUM_AUDIO_STREAMING_SPK,
+  ITF_NUM_VOLUME_CONTROL,
+  ITF_NUM_TOTAL
+};
+
+#define TUD_AUDIO_HEADSET_STEREO_DESC_LEN (TUD_AUDIO_DESC_IAD_LEN\
+    + TUD_AUDIO_DESC_STD_AC_LEN\
+    + TUD_AUDIO_DESC_CS_AC_LEN\
+    + TUD_AUDIO_DESC_CLK_SRC_LEN\
+    + TUD_AUDIO_DESC_INPUT_TERM_LEN\
+    + TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_LEN\
+    + TUD_AUDIO_DESC_OUTPUT_TERM_LEN\
+    /* Interface 1, Alternate 0 */\
+    + TUD_AUDIO_DESC_STD_AS_INT_LEN\
+    /* Interface 1, Alternate 0 */\
+    + TUD_AUDIO_DESC_STD_AS_INT_LEN\
+    + TUD_AUDIO_DESC_CS_AS_INT_LEN\
+    + TUD_AUDIO_DESC_TYPE_I_FORMAT_LEN\
+    + TUD_AUDIO_DESC_STD_AS_ISO_EP_LEN\
+    + TUD_AUDIO_DESC_CS_AS_ISO_EP_LEN\
+    /* Interface 1, Alternate 2 */\
+    + TUD_AUDIO_DESC_STD_AS_INT_LEN\
+    + TUD_AUDIO_DESC_CS_AS_INT_LEN\
+    + TUD_AUDIO_DESC_TYPE_I_FORMAT_LEN\
+    + TUD_AUDIO_DESC_STD_AS_ISO_EP_LEN\
+    + TUD_AUDIO_DESC_CS_AS_ISO_EP_LEN)
+
+#define TUD_AUDIO_HEADSET_STEREO_DESCRIPTOR(_itfnum_ctrl, _itfnum_audio, _stridx, _epout) \
+    /* Standard Interface Association Descriptor (IAD) */\
+    TUD_AUDIO_DESC_IAD(/*_firstitfs*/ _itfnum_ctrl, /*_nitfs*/ 2, /*_stridx*/ 0x00),\
+    \
+    /* Standard AC Interface Descriptor(4.7.1) */\
+    TUD_AUDIO_DESC_STD_AC(/*_itfnum*/ _itfnum_ctrl, /*_nEPs*/ 0x00, /*_stridx*/ _stridx),\
+    /* Class-Specific AC Interface Header Descriptor(4.7.2) */\
+    TUD_AUDIO_DESC_CS_AC(/*_bcdADC*/ 0x0200, /*_category*/ AUDIO_FUNC_DESKTOP_SPEAKER, /*_totallen*/ TUD_AUDIO_DESC_CLK_SRC_LEN+TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_LEN+TUD_AUDIO_DESC_INPUT_TERM_LEN+TUD_AUDIO_DESC_OUTPUT_TERM_LEN, /*_ctrl*/ AUDIO_CS_AS_INTERFACE_CTRL_LATENCY_POS),\
+    /* Clock Source Descriptor(4.7.2.1) */\
+    TUD_AUDIO_DESC_CLK_SRC(/*_clkid*/ UAC2_ENTITY_CLOCK, /*_attr*/ 3, /*_ctrl*/ 7, /*_assocTerm*/ 0x00,  /*_stridx*/ 0x00),    \
+    /* Input Terminal Descriptor(4.7.2.4) */\
+    TUD_AUDIO_DESC_INPUT_TERM(/*_termid*/ UAC2_ENTITY_SPK_INPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_USB_STREAMING, /*_assocTerm*/ 0x00, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_nchannelslogical*/ 0x02, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_NON_PREDEFINED, /*_idxchannelnames*/ 0x00, /*_ctrl*/ 0 * (AUDIO_CTRL_R << AUDIO_IN_TERM_CTRL_CONNECTOR_POS), /*_stridx*/ 0x00),\
+    /* Feature Unit Descriptor(4.7.2.8) */\
+    TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL(/*_unitid*/ UAC2_ENTITY_SPK_FEATURE_UNIT, /*_srcid*/ UAC2_ENTITY_SPK_INPUT_TERMINAL, /*_ctrlch0master*/ (AUDIO_CTRL_RW << AUDIO_FEATURE_UNIT_CTRL_MUTE_POS | AUDIO_CTRL_RW << AUDIO_FEATURE_UNIT_CTRL_VOLUME_POS), /*_ctrlch1*/ 0, /*_ctrlch2*/ 0, /*_stridx*/ 0x00),\
+    /* Output Terminal Descriptor(4.7.2.5) */\
+    TUD_AUDIO_DESC_OUTPUT_TERM(/*_termid*/ UAC2_ENTITY_SPK_OUTPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_OUT_DESKTOP_SPEAKER, /*_assocTerm*/ 0x00, /*_srcid*/ UAC2_ENTITY_SPK_FEATURE_UNIT, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_ctrl*/ 0x0000, /*_stridx*/ 0x00),\
+    \
+    /* Standard AS Interface Descriptor(4.9.1) */\
+    /* Interface 1, Alternate 0 - default alternate setting with 0 bandwidth */\
+    TUD_AUDIO_DESC_STD_AS_INT(/*_itfnum*/ _itfnum_audio, /*_altset*/ 0x00, /*_nEPs*/ 0x00, /*_stridx*/ 0x04),\
+    /* Standard AS Interface Descriptor(4.9.1) */\
+    /* Interface 1, Alternate 1 - alternate interface for data streaming */\
+    TUD_AUDIO_DESC_STD_AS_INT(/*_itfnum*/ _itfnum_audio, /*_altset*/ 0x01, /*_nEPs*/ 0x01, /*_stridx*/ 0x04),\
+    /* Class-Specific AS Interface Descriptor(4.9.2) */\
+    TUD_AUDIO_DESC_CS_AS_INT(/*_termid*/ UAC2_ENTITY_SPK_INPUT_TERMINAL, /*_ctrl*/ AUDIO_CTRL_NONE, /*_formattype*/ AUDIO_FORMAT_TYPE_I, /*_formats*/ AUDIO_DATA_FORMAT_TYPE_I_PCM, /*_nchannelsphysical*/ CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_NON_PREDEFINED, /*_stridx*/ 0x00),\
+    /* Type I Format Type Descriptor(2.3.1.6 - Audio Formats) */\
+    TUD_AUDIO_DESC_TYPE_I_FORMAT(CFG_TUD_AUDIO_FUNC_1_FORMAT_1_N_BYTES_PER_SAMPLE_RX, CFG_TUD_AUDIO_FUNC_1_FORMAT_1_RESOLUTION_RX),\
+    /* Standard AS Isochronous Audio Data Endpoint Descriptor(4.10.1.1) */\
+    TUD_AUDIO_DESC_STD_AS_ISO_EP(/*_ep*/ _epout, /*_attr*/ (uint8_t) (TUSB_XFER_ISOCHRONOUS | TUSB_ISO_EP_ATT_ADAPTIVE | TUSB_ISO_EP_ATT_DATA), /*_maxEPsize*/ TUD_AUDIO_EP_SIZE(CFG_TUD_AUDIO_FUNC_1_MAX_SAMPLE_RATE, CFG_TUD_AUDIO_FUNC_1_FORMAT_1_N_BYTES_PER_SAMPLE_RX, CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX), /*_interval*/ 0x01),\
+    /* Class-Specific AS Isochronous Audio Data Endpoint Descriptor(4.10.1.2) */\
+    TUD_AUDIO_DESC_CS_AS_ISO_EP(/*_attr*/ AUDIO_CS_AS_ISO_DATA_EP_ATT_NON_MAX_PACKETS_OK, /*_ctrl*/ AUDIO_CTRL_NONE, /*_lockdelayunit*/ AUDIO_CS_AS_ISO_DATA_EP_LOCK_DELAY_UNIT_MILLISEC, /*_lockdelay*/ 0x0001),\
+    /* Interface 1, Alternate 2 - alternate interface for data streaming */\
+    TUD_AUDIO_DESC_STD_AS_INT(/*_itfnum*/ (uint8_t)(_itfnum_audio), /*_altset*/ 0x02, /*_nEPs*/ 0x01, /*_stridx*/ 0x04),\
+    /* Class-Specific AS Interface Descriptor(4.9.2) */\
+    TUD_AUDIO_DESC_CS_AS_INT(/*_termid*/ UAC2_ENTITY_SPK_INPUT_TERMINAL, /*_ctrl*/ AUDIO_CTRL_NONE, /*_formattype*/ AUDIO_FORMAT_TYPE_I, /*_formats*/ AUDIO_DATA_FORMAT_TYPE_I_PCM, /*_nchannelsphysical*/ CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_NON_PREDEFINED, /*_stridx*/ 0x00),\
+    /* Type I Format Type Descriptor(2.3.1.6 - Audio Formats) */\
+    TUD_AUDIO_DESC_TYPE_I_FORMAT(CFG_TUD_AUDIO_FUNC_1_FORMAT_2_N_BYTES_PER_SAMPLE_RX, CFG_TUD_AUDIO_FUNC_1_FORMAT_2_RESOLUTION_RX),\
+    /* Standard AS Isochronous Audio Data Endpoint Descriptor(4.10.1.1) */\
+    TUD_AUDIO_DESC_STD_AS_ISO_EP(/*_ep*/ _epout, /*_attr*/ (uint8_t) (TUSB_XFER_ISOCHRONOUS | TUSB_ISO_EP_ATT_ADAPTIVE | TUSB_ISO_EP_ATT_DATA), /*_maxEPsize*/ TUD_AUDIO_EP_SIZE(CFG_TUD_AUDIO_FUNC_1_MAX_SAMPLE_RATE, CFG_TUD_AUDIO_FUNC_1_FORMAT_2_N_BYTES_PER_SAMPLE_RX, CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX), /*_interval*/ 0x01),\
+    /* Class-Specific AS Isochronous Audio Data Endpoint Descriptor(4.10.1.2) */\
+    TUD_AUDIO_DESC_CS_AS_ISO_EP(/*_attr*/ AUDIO_CS_AS_ISO_DATA_EP_ATT_NON_MAX_PACKETS_OK, /*_ctrl*/ AUDIO_CTRL_NONE, /*_lockdelayunit*/ AUDIO_CS_AS_ISO_DATA_EP_LOCK_DELAY_UNIT_MILLISEC, /*_lockdelay*/ 0x0001)
+
+
+#define TUD_HID_REPORT_DESC_HEADSET() \
+    HID_USAGE_PAGE ( HID_USAGE_PAGE_CONSUMER     )                    ,\
+    HID_USAGE      ( HID_USAGE_CONSUMER_CONTROL  )                    ,\
+    HID_COLLECTION ( HID_COLLECTION_APPLICATION  )                    ,\
+      HID_REPORT_ID(1)   \
+      HID_LOGICAL_MIN(0), \
+      HID_LOGICAL_MAX(1), \
+      HID_REPORT_SIZE(1), \
+      HID_REPORT_COUNT(1), \
+      HID_USAGE(HID_USAGE_CONSUMER_VOLUME_INCREMENT), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(HID_USAGE_CONSUMER_VOLUME_DECREMENT), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(HID_USAGE_CONSUMER_PLAY_PAUSE), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(HID_USAGE_CONSUMER_SCAN_NEXT), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(HID_USAGE_CONSUMER_SCAN_PREVIOUS), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(HID_USAGE_CONSUMER_STOP), \
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(0xb3), /* HID_USAGE_CONSUMER_FAST_FORWARD */\
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE(0xb4), /* HID_USAGE_CONSUMER_REWIND */\
+      HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+      HID_USAGE_PAGE(HID_USAGE_PAGE_TELEPHONY), \
+        HID_USAGE(0x24), /* HID_USAGE_TELEPHONY_REDIAL */\
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+        HID_USAGE(0x20), /* HID_USAGE_TELEPHONY_HOOK_SWITCH */\
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
+        HID_USAGE(0x2f), /* HID_USAGE_TELEPHONY_PHONE_MUTE */\
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_RELATIVE), \
+      HID_REPORT_COUNT(5), \
+      HID_INPUT(HID_CONSTANT | HID_ARRAY | HID_ABSOLUTE), \
+    HID_COLLECTION_END
+
+
+void usb_descriptors_dummy();

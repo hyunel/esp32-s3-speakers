@@ -1,0 +1,1 @@
+void touchsensor_init();

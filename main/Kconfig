@@ -1,0 +1,24 @@
+menu "TinyUSB Stack"
+    config TINYUSB_DEBUG_LEVEL
+        int "TinyUSB log level (0-3)"
+        default 1
+        range 0 3
+        help
+            Specify verbosity of TinyUSB log output.
+    
+    menu "TinyUSB task configuration"
+        config TINYUSB_TASK_PRIORITY
+            int "TinyUSB task priority"
+            default 10
+            depends on !TINYUSB_NO_DEFAULT_TASK
+            help
+                Set the priority of the default TinyUSB main task.
+
+        config TINYUSB_TASK_STACK_SIZE
+            int "TinyUSB task stack size (bytes)"
+            default 4096
+            depends on !TINYUSB_NO_DEFAULT_TASK
+            help
+                Set the stack size of the default TinyUSB main task.
+    endmenu
+endmenu # "TinyUSB Stack"
